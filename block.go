@@ -9,7 +9,7 @@ const (
 type BlockSide uint32
 
 const (
-	SideNorth = iota
+	SideNorth BlockSide = iota
 	SideSouth
 	SideEast
 	SideWest

@@ -20,7 +20,7 @@ var noise32 = simplex.New32(0)
 func (c *Chunk) GenerateTerrain() {
 	for x := 0; x < ChunkWidth; x++ {
 		for z := 0; z < ChunkHeight; z++ {
-			value := (noise32.Eval2(float32(x/20), float32(z/20))) * 0.5
+			value := (noise32.Eval2(float32(x/20), float32(z/20)) + 1) * 0.5
 			height := int32(value * ChunkHeight)
 
 			for height >= 0 {
