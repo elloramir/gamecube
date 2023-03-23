@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+	"fmt"
 	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
@@ -45,7 +47,7 @@ func CreateProgram(vertexSource, fragmentSource string) (uint32, error) {
 	return program, nil
 }
 
-func CompileShader(source string, shdaerType uint32) (uint32, error) {
+func CompileShader(source string, shaderType uint32) (uint32, error) {
 	shader := gl.CreateShader(shaderType)
 
 	// compile shader

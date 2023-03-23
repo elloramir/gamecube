@@ -44,11 +44,10 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("welcome adventurer, to 'gamecube'")
+	fmt.Println("welcome adventurer, to the 'gamecube'")
 	fmt.Println(gl.GoStr(gl.GetString(gl.VERSION)))
 
 	for !window.ShouldClose() {
-
 		window.SwapBuffers()
 		glfw.PollEvents()
 	}
