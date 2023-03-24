@@ -6,6 +6,10 @@ import (
 	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
+func GetUniform(program uint32, name string) (int32) {
+	return gl.GetUniformLocation(program, gl.Str(name + "\x00"))
+}
+
 func CreateProgram(vertexSource, fragmentSource string) (uint32, error) {
 	// compile vertex shader
 	vertexShader, err := CompileShader(vertexSource, gl.VERTEX_SHADER)
@@ -51,7 +55,7 @@ func CompileShader(source string, shaderType uint32) (uint32, error) {
 	shader := gl.CreateShader(shaderType)
 
 	// compile shader
-	csources, free := gl.Strs(source)
+	csources, free := gl.Strs(source + "\x00")
 	gl.ShaderSource(shader, 1, csources, nil)
 	free()
 	gl.CompileShader(shader)
