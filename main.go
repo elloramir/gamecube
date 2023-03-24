@@ -2,11 +2,16 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 	_"embed"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 )
+
+func init() {
+	runtime.LockOSThread()
+}
 
 var (
 	screenWidth = 800
@@ -79,6 +84,8 @@ func main() {
 	// time control
 	angle := 0.0
 	previousTime := glfw.GetTime()
+
+	fmt.Println("Chunk vertices: ", chunk.mesh.vertexCount)
 
 	for !window.ShouldClose() {
 		// frame time

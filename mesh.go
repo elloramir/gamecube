@@ -33,6 +33,7 @@ func (m *Mesh) Upload(vertices []float32) {
 }
 
 func (m *Mesh) Unload() {
+	m.vertexCount = 0
 	gl.DeleteVertexArrays(1, &m.vaoId)
 	gl.DeleteBuffers(1, &m.vboId)
 }
