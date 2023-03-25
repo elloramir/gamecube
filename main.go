@@ -61,9 +61,12 @@ func main() {
 	defer gl.DeleteProgram(program)
 
 	// create chunk
-	CreateChunk(0, 0)
-	CreateChunk(-1, 0)
-	CreateChunk(-1, 1)
+	for z := int32(-4); z < 4; z++ {
+		for x := int32(-4); x < 4; x++ {
+			CreateChunk(x, z)
+		}
+	}
+
 	defer NukeChunks()
 
 	// matrices

@@ -22,18 +22,20 @@ var chunksMap = make(map[uint64]Chunk)
 var noise32 = simplex.New32(0)
 
 // max and min values [-2147483648, 2147483647] 
-func GenerateId(x, z int32) uint64 {
-	return uint64(x)<<32 | uint64(z);
+func SpatialEncode(x, z int32) uint64 {
+	return (uint64(x) << 32) | uint64(uint32(z));
 }
 
-func DecodeId(id uint64) (int32, int32) {
-	return int32(id)>>32, int32(id)
+func SpatialDecode(id uint64) (int32, int32) {
+	x := int32(id >> 32)
+	z := int32(id & 0xffffffff)
+	return x, z
 }
 
 func CreateChunk(x, z int32) {
 	chunk := Chunk{}
 	chunk.x, chunk.z = x, z
-	chunk.hash = GenerateId(x, z)
+	chunk.hash = SpatialEncode(x, z)
 	chunk.GenerateTerrain()
 
 	chunksMap[chunk.hash] = chunk
