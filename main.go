@@ -61,10 +61,10 @@ func main() {
 	defer gl.DeleteProgram(program)
 
 	// create chunk
-	chunk := Chunk{}
-	chunk.GenerateTerrain()
-	chunk.Update()
-	defer chunk.Nuke()
+	CreateChunk(0, 0)
+	CreateChunk(-1, 0)
+	CreateChunk(-1, 1)
+	defer NukeChunks()
 
 	// matrices
 	aspect := float32(screenWidth)/float32(screenHeight)
@@ -85,8 +85,6 @@ func main() {
 	angle := 0.0
 	previousTime := glfw.GetTime()
 
-	fmt.Println("Chunk vertices: ", chunk.mesh.vertexCount)
-
 	for !window.ShouldClose() {
 		// frame time
 		time := glfw.GetTime()
@@ -103,7 +101,7 @@ func main() {
 		gl.ClearColor(0.1, 0.2, 0.3, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		chunk.mesh.Render()
+		RenderChunks()
 
 		window.SwapBuffers()
 		glfw.PollEvents()
