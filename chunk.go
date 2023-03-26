@@ -14,7 +14,7 @@ const (
 type Chunk struct {
 	x, z int32
 	hash uint64
-	blocks [ChunkWidth][ChunkHeight][ChunkLength]uint8
+	blocks [ChunkWidth][ChunkHeight][ChunkLength]BlockType
 	mesh Mesh
 }
 
@@ -78,47 +78,43 @@ func (c *Chunk) GenerateTerrain() {
 }
 
 // TODO: neighbour chunks in case of out bounds
-func (c *Chunk) GetBlock(x, y, z float32) (uint8) {
-	if x < 0 || x >= ChunkWidth {
-		return BlockVoid
-	}
-	if y < 0 || y >= ChunkHeight {
-		return BlockVoid
-	}
-	if z < 0 || z >= ChunkLength {
+func (c *Chunk) GetBlock(x, y, z int32) (BlockType) {
+	if y < 0 || y >= ChunkHeight || x < 0 || x >= ChunkWidth || z < 0 || z >= ChunkLength {
 		return BlockVoid
 	}
 
-	return c.blocks[uint32(x)][uint32(y)][uint32(z)]
+	return c.blocks[x][y][z]
 }
 
 func (c *Chunk) Update() {
 	var vertices []float32
 
-	for z := float32(0); z < ChunkLength; z++ {
-		for y := float32(0); y < ChunkHeight; y++ {
-			for x := float32(0); x < ChunkWidth; x++ {
-				absoluteX := x + float32(c.x * ChunkWidth)
-				absoluteZ := z + float32(c.z * ChunkLength) 
+	// relative coords
+	for z := int32(0); z < ChunkLength; z++ {
+		for y := int32(0); y < ChunkHeight; y++ {
+			for x := int32(0); x < ChunkWidth; x++ {
+				// real world coordinates
+				absoluteX := float32(x + c.x * ChunkWidth)
+				absoluteZ := float32(z + c.z * ChunkLength)
 
 				if c.GetBlock(x, y, z) != BlockAir {
 					if c.GetBlock(x, y, z-1) == BlockAir {
-						vertices = append(vertices, BlockGenFace(SideNorth, absoluteX, y, absoluteZ)...)
+						vertices = append(vertices, BlockGenFace(SideNorth, absoluteX, float32(y), absoluteZ)...)
 					}
 					if c.GetBlock(x, y, z+1) == BlockAir {
-						vertices = append(vertices, BlockGenFace(SideSouth, absoluteX, y, absoluteZ)...)
+						vertices = append(vertices, BlockGenFace(SideSouth, absoluteX, float32(y), absoluteZ)...)
 					}
 					if c.GetBlock(x+1, y, z) == BlockAir {
-						vertices = append(vertices, BlockGenFace(SideEast, absoluteX, y, absoluteZ)...)
+						vertices = append(vertices, BlockGenFace(SideEast, absoluteX, float32(y), absoluteZ)...)
 					}
 					if c.GetBlock(x-1, y, z) == BlockAir {
-						vertices = append(vertices, BlockGenFace(SideWest, absoluteX, y, absoluteZ)...)
+						vertices = append(vertices, BlockGenFace(SideWest, absoluteX, float32(y), absoluteZ)...)
 					}
 					if c.GetBlock(x, y+1, z) == BlockAir {
-						vertices = append(vertices, BlockGenFace(SideTop, absoluteX, y, absoluteZ)...)
+						vertices = append(vertices, BlockGenFace(SideTop, absoluteX, float32(y), absoluteZ)...)
 					}
 					if c.GetBlock(x, y-1, z) == BlockAir {
-						vertices = append(vertices, BlockGenFace(SideBottom, absoluteX, y, absoluteZ)...)
+						vertices = append(vertices, BlockGenFace(SideBottom, absoluteX, float32(y), absoluteZ)...)
 					}
 				}				
 			}

@@ -1,7 +1,9 @@
 package main
 
+type BlockType uint8
+
 const (
-	BlockAir = iota
+	BlockAir BlockType = iota
 	BlockVoid
 	BlockGrass
 )

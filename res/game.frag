@@ -8,5 +8,5 @@ uniform sampler2D tex;
 
 void main() {
     // outputColor = texture(tex, vec2(uv.x, 1 - uv.y));
-    outputColor = vec4(uv.x, uv.y, 1.0, 1.0);
+    outputColor = vec4(uv.x, uv.y, 0.0, 1.0);
 }

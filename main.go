@@ -66,7 +66,6 @@ func main() {
 			CreateChunk(x, z)
 		}
 	}
-
 	defer NukeChunks()
 
 	// matrices
