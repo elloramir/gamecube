@@ -41,6 +41,10 @@ func main() {
 		panic(err)
 	}
 
+	// window callbacks
+	window.SetKeyCallback(KeyboardCallback)
+	window.SetCursorPosCallback(MouseCallback)
+
 	window.MakeContextCurrent()
 	glfw.SwapInterval(1)
 
