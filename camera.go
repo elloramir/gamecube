@@ -11,7 +11,7 @@ const (
 	Near = 0.001
 	Far = 1000
 	Fov = 45
-	Sensitivity = 3.0/100.0
+	Sensitivity = 1.0/30.0
 )
 
 type Camera struct {
@@ -28,6 +28,7 @@ func (c *Camera) Init(aspect float32) {
 }
 
 func (c *Camera) Update() {
+	// keyboard moviment
 	if IsKeyDown(glfw.KeyW) {
 		c.position = c.position.Add(c.front)
 	}
@@ -48,16 +49,9 @@ func (c *Camera) Update() {
 	}
 
 	// mouse looking
-	mouseX, mouseY := MouseRelativePosition()
-	c.yaw += mouseX * Sensitivity;
-	c.pitch -= mouseY * Sensitivity;
-
-	if (c.pitch > 89.0) {
-		c.pitch = 89.0;
-	}
-	if (c.pitch < -89.0) {
-		c.pitch = -89.0;
-	}
+	mouseDeltaX, mouseDeltaY := MouseRelativePosition()
+	c.yaw += mouseDeltaX * Sensitivity;
+	c.pitch = math32.Max(math32.Min(c.pitch - mouseDeltaY * Sensitivity, 89.0), -89.0)
 
 	// update matrices
 	target := mgl32.Vec3{
