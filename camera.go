@@ -28,7 +28,7 @@ func (c *Camera) Init(aspect float32) {
 }
 
 func (c *Camera) Update() {
-	// keyboard moviment
+	// keyboard movement
 	if IsKeyDown(glfw.KeyW) {
 		c.position = c.position.Add(c.front)
 	}
@@ -64,9 +64,8 @@ func (c *Camera) Update() {
 }
 
 func (c *Camera) SendUniforms(program uint32) {
-	projectionLocation := GetUniform(program, "projectionUniform")
-	viewLocation := GetUniform(program, "viewUniform")
+	viewProjLocation := GetUniform(program, "viewProjMatrix")
+	viewProj := c.projectionMatrix.Mul4(c.viewMatrix)
 
-	gl.UniformMatrix4fv(projectionLocation, 1, false, &c.projectionMatrix[0])
-	gl.UniformMatrix4fv(viewLocation, 1, false, &c.viewMatrix[0])
+	gl.UniformMatrix4fv(viewProjLocation, 1, false, &viewProj[0])
 }
