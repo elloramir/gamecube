@@ -6,7 +6,6 @@ import (
 	_"embed"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/gl/v3.3-core/gl"
-	"github.com/go-gl/mathgl/mgl32"
 )
 
 func init() {
@@ -46,6 +45,7 @@ func main() {
 	window.SetCursorPosCallback(MouseCallback)
 
 	window.MakeContextCurrent()
+	window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled);
 	glfw.SwapInterval(1)
 
 	// load opengl
@@ -57,13 +57,6 @@ func main() {
 	fmt.Println("welcome adventurer, to the 'gamecube'")
 	fmt.Println(gl.GoStr(gl.GetString(gl.VERSION)))
 
-	// load default shader
-	program, err := CreateProgram(vertexSource, fragmentSource)
-	if err != nil {
-		panic(err)
-	}
-	defer gl.DeleteProgram(program)
-
 	// create chunk
 	for z := int32(-4); z < 4; z++ {
 		for x := int32(-4); x < 4; x++ {
@@ -72,35 +65,27 @@ func main() {
 	}
 	defer NukeChunks()
 
-	// matrices
-	aspect := float32(screenWidth)/float32(screenHeight)
-	projectionMatrix := mgl32.Perspective(mgl32.DegToRad(45), aspect, 0.001, 1000)
-	viewMatrix := mgl32.LookAtV(mgl32.Vec3{3, 20, -20}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	modelMatrix := mgl32.Ident4()
-
-	projectionLocation := GetUniform(program, "projectionUniform")
-	viewLocation := GetUniform(program, "viewUniform")
-	modelLocation := GetUniform(program, "modelUniform")
+	// load default shader
+	program, err := CreateProgram(vertexSource, fragmentSource)
+	if err != nil {
+		panic(err)
+	}
+	defer gl.DeleteProgram(program)
 
 	gl.Enable(gl.DEPTH_TEST)
 	gl.UseProgram(program)
-	gl.UniformMatrix4fv(projectionLocation, 1, false, &projectionMatrix[0])
-	gl.UniformMatrix4fv(viewLocation, 1, false, &viewMatrix[0])
 
-	// time control
-	angle := 0.0
-	previousTime := glfw.GetTime()
+	camera := Camera{}
+	camera.Init(float32(screenWidth)/float32(screenHeight))
 
 	for !window.ShouldClose() {
-		// frame time
-		time := glfw.GetTime()
-		elapsed := time - previousTime
-		previousTime = time
-
 		// update
-		angle += elapsed
-		modelMatrix = mgl32.HomogRotate3D(float32(angle), mgl32.Vec3{0, 1, 0})
-		gl.UniformMatrix4fv(modelLocation, 1, false, &modelMatrix[0])
+		camera.Update()
+		camera.SendUniforms(program)
+
+		if IsKeyDown(glfw.KeyEscape) {
+			break
+		}
 
 		// render
 		gl.Viewport(0, 0, int32(screenWidth), int32(screenHeight))

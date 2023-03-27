@@ -5,11 +5,10 @@ layout (location = 1) in vec2 uvAttribute;
 
 uniform mat4 projectionUniform;
 uniform mat4 viewUniform;
-uniform mat4 modelUniform;
 
 out vec2 uv;
 
 void main() {
 	uv = uvAttribute;
-	gl_Position = projectionUniform * viewUniform * modelUniform * vec4(positionAttribute, 1.0);	
+	gl_Position = projectionUniform * viewUniform * vec4(positionAttribute, 1.0);	
 }

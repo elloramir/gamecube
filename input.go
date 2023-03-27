@@ -18,7 +18,7 @@ func MouseCallback(_ *glfw.Window, xPos float64, yPos float64) {
 	mouseX, mouseY = xPos, yPos 
 }
 
-func IsKeyPressed(key glfw.Key) bool {
+func IsKeyDown(key glfw.Key) bool {
 	return keyStates[key]
 }
 
@@ -26,6 +26,7 @@ func MousePosition() (float32, float32) {
 	return float32(mouseX), float32(mouseY)
 }
 
+// TODO: dead zone
 func MouseRelativePosition() (float32, float32) {
-	return float32(lastMouseX), float32(lastMouseY)
+	return float32(mouseX-lastMouseX), float32(mouseY-lastMouseY)
 }
