@@ -78,6 +78,12 @@ func main() {
 	camera := Camera{}
 	camera.Init(float32(screenWidth)/float32(screenHeight))
 
+	// load test texture
+	tex, err := LoadTexture("res/sprite.png")
+	if err != nil {
+		panic(err)
+	}
+
 	for !window.ShouldClose() {
 		// update
 		camera.Update()
@@ -91,10 +97,12 @@ func main() {
 		gl.Viewport(0, 0, int32(screenWidth), int32(screenHeight))
 		gl.ClearColor(0.1, 0.2, 0.3, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		gl.BindTexture(gl.TEXTURE_2D, tex)
 
 		RenderChunks()
 
 		window.SwapBuffers()
+		InputUpdate()
 		glfw.PollEvents()
 	}
 }

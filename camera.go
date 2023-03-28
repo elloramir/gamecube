@@ -11,7 +11,7 @@ const (
 	Near = 0.001
 	Far = 1000
 	Fov = 45
-	Sensitivity = 1.0/30.0
+	Sensitivity = 1.0/20.0
 )
 
 type Camera struct {
@@ -60,7 +60,7 @@ func (c *Camera) Update() {
 		math32.Sin(mgl32.DegToRad(c.yaw)) * math32.Cos(mgl32.DegToRad(c.pitch))}
 
 	c.front = target.Normalize()
-	c.viewMatrix = mgl32.LookAtV(c.position, c.position.Add(c.front), mgl32.Vec3{0, 1, 0})
+	c.viewMatrix = mgl32.LookAtV(c.position, c.position.Add(c.front), c.up)
 }
 
 func (c *Camera) SendUniforms(program uint32) {
