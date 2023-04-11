@@ -54,6 +54,30 @@ func NukeChunks() {
 	}
 }
 
+func GetAnyBlock(x, y, z int32) (BlockType) {
+	// chunks behaviour as grids
+	gridX := x / ChunkWidth
+	gridZ := z / ChunkLength
+
+	// grid cell (block coords)
+	cellX := x % ChunkWidth
+	cellZ := z % ChunkLength
+
+	if cellX < 0 {
+		cellX += ChunkWidth
+	}
+	if cellZ < 0 {
+		cellZ += ChunkLength
+	}
+
+	chunk, exists := chunksMap[SpatialEncode(gridX, gridZ)]
+	if !exists {
+		return BlockVoid
+	}
+
+	return chunk.blocks[cellX][y][cellZ]
+}
+
 func (c *Chunk) GenerateTerrain() {
 	offsetX := int(c.x * ChunkWidth)
 	offsetZ := int(c.z * ChunkLength)
@@ -63,7 +87,7 @@ func (c *Chunk) GenerateTerrain() {
 			noiseX := float32(offsetX+x)/ChunkSmooth
 			noiseY := float32(offsetZ+z)/ChunkSmooth
 
-			// norm from [0, 1] to [-1, 1]
+			// norm from [-1, 1] to [0, 1]
 			value := (noise32.Eval2(noiseX, noiseY) + 1) * 0.5
 			height := int32(value * ChunkHeight)
 
@@ -77,9 +101,17 @@ func (c *Chunk) GenerateTerrain() {
 	c.Update()
 }
 
-// TODO: neighbour chunks in case of out bounds
 func (c *Chunk) GetBlock(x, y, z int32) (BlockType) {
-	if y < 0 || y >= ChunkHeight || x < 0 || x >= ChunkWidth || z < 0 || z >= ChunkLength {
+	if y < 0 || y >= ChunkHeight {
+		return BlockVoid
+	}
+
+	// neighbour check
+	if x < 0 || x >= ChunkWidth || z < 0 || z >= ChunkLength {
+		absoluteX := int32(x + c.x * ChunkWidth)
+		absoluteZ := int32(z + c.z * ChunkLength)
+
+		// return GetAnyBlock(absoluteX, y, absoluteZ)
 		return BlockVoid
 	}
 
@@ -120,6 +152,7 @@ func (c *Chunk) Update() {
 			}
 		}
 	}
+
 
 	c.mesh.Unload()
 	c.mesh.Upload(vertices)
