@@ -5,11 +5,11 @@ import (
 )
 
 var keyStates [glfw.KeyLast]bool
-var mouseX, mouseY float64
-var lastMouseX, lastMouseY float64
+var mouseX, mouseY float32
+var mouseRelativeX, mouseRelativeY float32
 
 func InputUpdate() {
-	lastMouseX, lastMouseY = mouseX, mouseY
+	mouseRelativeX, mouseRelativeY = 0, 0
 }
 
 func KeyboardCallback(_ *glfw.Window, key glfw.Key, _ int, action glfw.Action, _ glfw.ModifierKey) {
@@ -17,7 +17,12 @@ func KeyboardCallback(_ *glfw.Window, key glfw.Key, _ int, action glfw.Action, _
 }
 
 func MouseCallback(_ *glfw.Window, xPos float64, yPos float64) {
-	mouseX, mouseY = xPos, yPos 
+	mouseRelativeX = float32(xPos)-mouseX
+	mouseRelativeY = float32(yPos)-mouseY
+
+	// save current mouse position
+	mouseX = float32(xPos) 
+	mouseY = float32(yPos) 
 }
 
 func IsKeyDown(key glfw.Key) bool {
@@ -25,9 +30,9 @@ func IsKeyDown(key glfw.Key) bool {
 }
 
 func MousePosition() (float32, float32) {
-	return float32(mouseX), float32(mouseY)
+	return mouseX, mouseY
 }
 
 func MouseRelativePosition() (float32, float32) {
-	return float32(mouseX-lastMouseX), float32(mouseY-lastMouseY)
+	return mouseRelativeX, mouseRelativeY
 }

@@ -1,31 +1,25 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"runtime"
-	_"embed"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/gl/v3.3-core/gl"
 )
-
-func init() {
-	runtime.LockOSThread()
-}
 
 var (
 	screenWidth = 800
 	screenHeight = 600
 )
 
-//go:embed res/game.vert
-var vertexSource string
-//go:embed res/game.frag
-var fragmentSource string
+func init() {
+	runtime.LockOSThread()
+}
 
 func main() {
 	err := glfw.Init()
 	if err != nil {
-		panic(err)
+		log.Fatal("Can't initialize GLFW")
 	}
 	defer glfw.Terminate()
 
@@ -37,72 +31,34 @@ func main() {
 
 	window, err := glfw.CreateWindow(screenWidth, screenHeight, "", nil, nil)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	// window callbacks
+	window.MakeContextCurrent()
+	window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
 	window.SetKeyCallback(KeyboardCallback)
 	window.SetCursorPosCallback(MouseCallback)
 
-	window.MakeContextCurrent()
-	window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled);
-	glfw.SwapInterval(1)
+	glfw.SwapInterval(1) // vsync on
 
-	// load opengl
+	// loading opengl
 	err = gl.Init()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	fmt.Println("welcome adventurer, to the 'gamecube'")
-	fmt.Println(gl.GoStr(gl.GetString(gl.VERSION)))
-
-	// create chunk
-	for z := int32(-4); z < 4; z++ {
-		for x := int32(-4); x < 4; x++ {
-			CreateChunk(x, z)
-		}
-	}
-	defer NukeChunks()
-
-	// load default shader
-	program, err := CreateProgram(vertexSource, fragmentSource)
-	if err != nil {
-		panic(err)
-	}
-	defer gl.DeleteProgram(program)
-
-	gl.Enable(gl.DEPTH_TEST)
-	gl.UseProgram(program)
-
-	camera := Camera{}
-	camera.Init(float32(screenWidth)/float32(screenHeight))
-
-	// load test texture
-	tex, err := LoadTexture("res/sprite.png")
-	if err != nil {
-		panic(err)
-	}
+	// program startup
+	log.Println("welcome adventurer, to the 'gamecube'")
+	log.Println(gl.GoStr(gl.GetString(gl.VERSION)))
 
 	for !window.ShouldClose() {
-		// update
-		camera.Update()
-		camera.SendUniforms(program)
+		glfw.PollEvents()
+		InputUpdate()
 
 		if IsKeyDown(glfw.KeyEscape) {
 			break
 		}
 
-		// render
-		gl.Viewport(0, 0, int32(screenWidth), int32(screenHeight))
-		gl.ClearColor(0.1, 0.2, 0.3, 1.0)
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		gl.BindTexture(gl.TEXTURE_2D, tex)
-
-		RenderChunks()
-
 		window.SwapBuffers()
-		InputUpdate()
-		glfw.PollEvents()
 	}
 }
