@@ -14,12 +14,12 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-type Vertex struct {
+type Vertices struct {
 	Data    []float32
 	Indices []uint32
 }
 
-func (v *Vertex) BakeQuad(a, b, c, d mgl32.Vec3) {
+func (v *Vertices) BakeQuad(a, b, c, d mgl32.Vec3) {
 	i := uint32(len(v.Data))
 
 	v.Data = append(v.Data,
@@ -33,7 +33,7 @@ func (v *Vertex) BakeQuad(a, b, c, d mgl32.Vec3) {
 		i+0, i+2, i+3)
 }
 
-func (v *Vertex) ToMesh() *Mesh {
+func (v *Vertices) ToMesh() *Mesh {
 	m := &Mesh{}
 	m.Upload(v.Data, v.Indices)
 

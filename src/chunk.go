@@ -79,7 +79,7 @@ func (c *Chunk) GetBlock(x, y, z int32) uint8 {
 }
 
 func (c *Chunk) update() {
-	vert := Vertex{}
+	vert := Vertices{}
 
 	for k := int32(0); k < SizeLength; k++ {
 		for j := int32(0); j < SizeHeight; j++ {

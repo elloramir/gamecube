@@ -8,7 +8,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
@@ -48,8 +47,6 @@ func (m *Mesh) Upload(vertices []float32, indices []uint32) {
 func (m *Mesh) Unload() {
 	m.vertexCount = 0
 	m.indexCount = 0
-
-	fmt.Println("vao", &m.vaoId)
 
 	gl.DeleteVertexArrays(1, &m.vaoId)
 	gl.DeleteBuffers(1, &m.vboId)

@@ -50,19 +50,29 @@ func main() {
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	fmt.Println("OpenGL version", version)
 
-	// Playground
-	c := NewChunk(0, 0)
-
 	// Configure global settings
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
 	gl.ClearColor(0.1, 0.2, 0.3, 1.0)
 
+	// Playground
+	chunk := NewChunk(0, 0)
+	camera := NewCamera()
+	program, err := LoadShader("shaders/game.vert", "shaders/game.frag")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	for !window.ShouldClose() {
+		// Render
+		gl.Viewport(0, 0, windowWidth, windowHeight)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		c.Terrain.Render()
+		camera.SendUniforms(program)
+		gl.UseProgram(program)
+		chunk.Terrain.Render()
 
 		// Maintenance
+		camera.Update()
 		window.SwapBuffers()
 		glfw.PollEvents()
 	}
