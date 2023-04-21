@@ -38,7 +38,7 @@ var Noise32 = simplex.New32(0)
 type Chunk struct {
 	X, Z    int32
 	Data    [SizeWidth][SizeHeight][SizeLength]uint8
-	terrain *Mesh
+	Terrain *Mesh
 }
 
 func NewChunk(x, z int32) *Chunk {
@@ -134,5 +134,5 @@ func (c *Chunk) update() {
 		}
 	}
 
-	c.terrain = vert.ToMesh()
+	c.Terrain = vert.ToMesh()
 }
