@@ -52,7 +52,9 @@ func main() {
 
 	// Configure global settings
 	gl.Enable(gl.DEPTH_TEST)
+	gl.Enable(gl.BLEND)
 	gl.DepthFunc(gl.LESS)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	gl.ClearColor(0.1, 0.2, 0.3, 1.0)
 
 	// Playground
@@ -62,14 +64,26 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	wprogram, err := LoadShader("shaders/game.vert", "shaders/water.frag")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	for !window.ShouldClose() {
 		// Render
 		gl.Viewport(0, 0, windowWidth, windowHeight)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		camera.SendUniforms(program)
-		gl.UseProgram(program)
-		chunk.Terrain.Render()
+
+		if chunk.Terrain != nil {
+			camera.SendUniforms(program)
+			gl.UseProgram(program)
+			chunk.Terrain.Render()
+		}
+		if chunk.Water != nil {
+			camera.SendUniforms(wprogram)
+			gl.UseProgram(wprogram)
+			chunk.Water.Render()
+		}
 
 		// Maintenance
 		camera.Update()

@@ -2,7 +2,7 @@
 // Use of this source code is governed by MIT
 // license that can be found in the LICENSE file.
 
-// Its a Eauler camera, nothing more to say about it.
+// Its a Euler camera, nothing more to say about it.
 
 package main
 
@@ -49,5 +49,5 @@ func (c *Camera) SendUniforms(program uint32) {
 
 	gl.UseProgram(program)
 	gl.UniformMatrix4fv(loc, 1, false, &c.transMat[0])
-	gl.UseProgram(0) 
+	gl.UseProgram(0)
 }

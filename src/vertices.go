@@ -20,7 +20,7 @@ type Vertices struct {
 }
 
 func (v *Vertices) BakeQuad(a, b, c, d mgl32.Vec3) {
-	i := uint32(len(v.Data)/3)
+	i := uint32(len(v.Data) / 3)
 
 	v.Data = append(v.Data,
 		a.X(), a.Y(), a.Z(),
@@ -34,6 +34,10 @@ func (v *Vertices) BakeQuad(a, b, c, d mgl32.Vec3) {
 }
 
 func (v *Vertices) ToMesh() *Mesh {
+	if len(v.Data) == 0 {
+		return nil
+	}
+
 	m := &Mesh{}
 	m.Upload(v.Data, v.Indices)
 

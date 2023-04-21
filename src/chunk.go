@@ -13,7 +13,6 @@
 package main
 
 import (
-	_ "fmt"
 	"github.com/go-gl/mathgl/mgl32"
 	simplex "github.com/ojrac/opensimplex-go"
 )
@@ -28,10 +27,14 @@ const (
 	BlockEmpty = iota
 	BlockGrass
 	BlockVoid
+	BlockWater
 )
 
-// TODO: Move to world?
-const NoiseSmooth = 20.0
+// Misc
+const (
+	NoiseSmooth = 20
+	WaterHeight = 3
+)
 
 var Noise32 = simplex.New32(0)
 
@@ -39,6 +42,7 @@ type Chunk struct {
 	X, Z    int32
 	Data    [SizeWidth][SizeHeight][SizeLength]uint8
 	Terrain *Mesh
+	Water   *Mesh
 }
 
 func NewChunk(x, z int32) *Chunk {
@@ -61,7 +65,13 @@ func (c *Chunk) generateTerrain() {
 			// Normalize from [-1, 1] to [0, 1]
 			value := (Noise32.Eval2(noiseX, noiseY) + 1) * 0.5
 			height := int32(value * SizeHeight)
+			
+			// Water
+			if height < WaterHeight {
+				c.Data[x][WaterHeight][z] = BlockWater
+			}
 
+			// Grass
 			for height >= 0 {
 				c.Data[x][height][z] = BlockGrass
 				height -= 1
@@ -77,67 +87,79 @@ func (c *Chunk) GetBlock(x, y, z int32) uint8 {
 
 	// TODO: Neighbour check
 	if x < 0 || x >= SizeWidth || z < 0 || z >= SizeLength {
-		return BlockVoid
+		return BlockEmpty
 	}
 
 	return c.Data[x][y][z]
 }
 
 func (c *Chunk) update() {
-	vert := Vertices{}
+	tVerts := Vertices{} // Terrain vertices
+	wVerts := Vertices{} // Water vertices
 
 	for k := int32(0); k < SizeLength; k++ {
 		for j := int32(0); j < SizeHeight; j++ {
 			for i := int32(0); i < SizeWidth; i++ {
-				// Skip current block if empty
-				if c.GetBlock(i, j, k) == BlockEmpty {
+				currentBlock := c.GetBlock(i, j, k)
+
+				// Skip empty block
+				if currentBlock == BlockEmpty {
 					continue
 				}
 
-				// Pretty usefull
-				x := float32(i)
-				y := float32(j)
-				z := float32(k)
-
-				// Pre-computed vertices positions
+				// Enumerated vertices
 				//   0-------1
 				//  /       /|
 				// 3-------2 |
 				// | 4     | 5
 				// |       |/
 				// 7-------6
-				v0 := mgl32.Vec3{-0.5 + x, -0.5 + y, -0.5 + z}
-				v1 := mgl32.Vec3{+0.5 + x, -0.5 + y, -0.5 + z}
-				v2 := mgl32.Vec3{+0.5 + x, -0.5 + y, +0.5 + z}
-				v3 := mgl32.Vec3{-0.5 + x, -0.5 + y, +0.5 + z}
+
+				x := float32(i)
+				y := float32(j)
+				z := float32(k)
+
+				// The current block can be water, that said, we can
+				// create the remaining vertices after checking it
 				v4 := mgl32.Vec3{-0.5 + x, +0.5 + y, -0.5 + z}
 				v5 := mgl32.Vec3{+0.5 + x, +0.5 + y, -0.5 + z}
 				v6 := mgl32.Vec3{+0.5 + x, +0.5 + y, +0.5 + z}
 				v7 := mgl32.Vec3{-0.5 + x, +0.5 + y, +0.5 + z}
 
-				// The orientation order is pretty specific
-				// going from negative to positive based on face normal vector
+				if currentBlock == BlockWater {
+					wVerts.BakeQuad(v7, v6, v5, v4)
+					continue
+				}
+
+				v0 := mgl32.Vec3{-0.5 + x, -0.5 + y, -0.5 + z}
+				v1 := mgl32.Vec3{+0.5 + x, -0.5 + y, -0.5 + z}
+				v2 := mgl32.Vec3{+0.5 + x, -0.5 + y, +0.5 + z}
+				v3 := mgl32.Vec3{-0.5 + x, -0.5 + y, +0.5 + z}
+
+				// The orientation order is very specific
+				// going from negative to positive based on the face's normal
 				if c.GetBlock(i, j, k-1) == BlockEmpty {
-					vert.BakeQuad(v1, v0, v4, v5)
+					tVerts.BakeQuad(v1, v0, v4, v5)
 				}
 				if c.GetBlock(i, j, k+1) == BlockEmpty {
-					vert.BakeQuad(v3, v2, v6, v7)
+					tVerts.BakeQuad(v3, v2, v6, v7)
 				}
 				if c.GetBlock(i-1, j, k) == BlockEmpty {
-					vert.BakeQuad(v0, v3, v7, v4)
+					tVerts.BakeQuad(v0, v3, v7, v4)
 				}
 				if c.GetBlock(i+1, j, k) == BlockEmpty {
-					vert.BakeQuad(v2, v1, v5, v6)
+					tVerts.BakeQuad(v2, v1, v5, v6)
 				}
 				if c.GetBlock(i, j+1, k) == BlockEmpty {
-					vert.BakeQuad(v7, v6, v5, v4)
+					tVerts.BakeQuad(v7, v6, v5, v4)
 				}
 				if c.GetBlock(i, j-1, k) == BlockEmpty {
-					vert.BakeQuad(v0, v1, v2, v3)
+					tVerts.BakeQuad(v0, v1, v2, v3)
 				}
 			}
 		}
 	}
 
-	c.Terrain = vert.ToMesh()
+	c.Terrain = tVerts.ToMesh()
+	c.Water = wVerts.ToMesh()
 }
