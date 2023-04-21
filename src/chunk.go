@@ -20,7 +20,7 @@ import (
 
 const (
 	SizeWidth  = 16
-	SizeHeight = 32
+	SizeHeight = 16
 	SizeLength = 16
 )
 
@@ -71,7 +71,12 @@ func (c *Chunk) generateTerrain() {
 }
 
 func (c *Chunk) GetBlock(x, y, z int32) uint8 {
-	if x < 0 || z < 0 || y < 0 || x >= SizeWidth || z >= SizeLength || y >= SizeHeight {
+	if y < 0 || y >= SizeLength {
+		return BlockVoid
+	}
+
+	// TODO: Neighbour check
+	if x < 0 || x >= SizeWidth || z < 0 || z >= SizeLength {
 		return BlockVoid
 	}
 
@@ -95,12 +100,12 @@ func (c *Chunk) update() {
 				z := float32(k)
 
 				// Pre-computed vertices positions
-				//   0------1
-				//  /      /|
-				// 3------2 |
-				// | 4    | 5
-				// |      |/
-				// 7------6
+				//   0-------1
+				//  /       /|
+				// 3-------2 |
+				// | 4     | 5
+				// |       |/
+				// 7-------6
 				v0 := mgl32.Vec3{-0.5 + x, -0.5 + y, -0.5 + z}
 				v1 := mgl32.Vec3{+0.5 + x, -0.5 + y, -0.5 + z}
 				v2 := mgl32.Vec3{+0.5 + x, -0.5 + y, +0.5 + z}
@@ -124,10 +129,10 @@ func (c *Chunk) update() {
 				if c.GetBlock(i+1, j, k) == BlockEmpty {
 					vert.BakeQuad(v2, v1, v5, v6)
 				}
-				if c.GetBlock(i, j-1, k) == BlockEmpty {
+				if c.GetBlock(i, j+1, k) == BlockEmpty {
 					vert.BakeQuad(v7, v6, v5, v4)
 				}
-				if c.GetBlock(i, j+1, k) == BlockEmpty {
+				if c.GetBlock(i, j-1, k) == BlockEmpty {
 					vert.BakeQuad(v0, v1, v2, v3)
 				}
 			}
