@@ -8,7 +8,7 @@
 // The BakeQuad method simplifies the process of adding four vertices
 // that define a quad to the vertex buffer.
 
-package main
+package game
 
 import (
 	"github.com/go-gl/mathgl/mgl32"

@@ -6,7 +6,7 @@
 // Also provides an embed file system for the shaders folder as it is considered
 // part of our code, not an external resource.
 
-package main
+package game
 
 import (
 	"embed"

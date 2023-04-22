@@ -8,6 +8,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/elloramir/gamecube/game"
 	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"log"
@@ -53,18 +54,20 @@ func main() {
 	// Configure global settings
 	gl.Enable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
+	gl.Enable(gl.CULL_FACE)
+	gl.CullFace(gl.BACK)
 	gl.DepthFunc(gl.LESS)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	gl.ClearColor(0.1, 0.2, 0.3, 1.0)
 
 	// Playground
-	chunk := NewChunk(0, 0)
-	camera := NewCamera()
-	program, err := LoadShader("shaders/game.vert", "shaders/game.frag")
+	chunk := game.NewChunk(0, 0)
+	camera := game.NewCamera()
+	program, err := game.LoadShader("shaders/game.vert", "shaders/game.frag")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	wprogram, err := LoadShader("shaders/game.vert", "shaders/water.frag")
+	wprogram, err := game.LoadShader("shaders/game.vert", "shaders/water.frag")
 	if err != nil {
 		log.Fatalln(err)
 	}

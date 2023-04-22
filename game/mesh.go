@@ -5,7 +5,7 @@
 // This file defines the Mesh struct used for rendering and building meshes
 // in the Voxel Engine.
 
-package main
+package game
 
 import (
 	"github.com/go-gl/gl/v3.3-core/gl"

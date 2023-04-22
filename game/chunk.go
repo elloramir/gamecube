@@ -10,7 +10,7 @@
 // This file contains code for generating new chunks as well as managing
 // the data structures that represent them in memory.
 
-package main
+package game
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
@@ -65,7 +65,7 @@ func (c *Chunk) generateTerrain() {
 			// Normalize from [-1, 1] to [0, 1]
 			value := (Noise32.Eval2(noiseX, noiseY) + 1) * 0.5
 			height := int32(value * SizeHeight)
-			
+
 			// Water
 			if height < WaterHeight {
 				c.Data[x][WaterHeight][z] = BlockWater
