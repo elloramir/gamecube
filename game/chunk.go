@@ -48,7 +48,7 @@ type Chunk struct {
 func NewChunk(x, z int32) *Chunk {
 	c := &Chunk{X: x, Z: z}
 	c.generateTerrain()
-	c.update()
+	c.generateMesh()
 
 	return c
 }
@@ -66,15 +66,15 @@ func (c *Chunk) generateTerrain() {
 			value := (Noise32.Eval2(noiseX, noiseY) + 1) * 0.5
 			height := int32(value * SizeHeight)
 
-			// Water
-			if height < WaterHeight {
-				c.Data[x][WaterHeight][z] = BlockWater
-			}
-
 			// Grass
 			for height >= 0 {
 				c.Data[x][height][z] = BlockGrass
 				height -= 1
+			}
+
+			// Water
+			if c.Data[x][WaterHeight][z] == BlockEmpty {
+				c.Data[x][WaterHeight][z] = BlockWater
 			}
 		}
 	}
@@ -93,7 +93,13 @@ func (c *Chunk) GetBlock(x, y, z int32) uint8 {
 	return c.Data[x][y][z]
 }
 
-func (c *Chunk) update() {
+func (c *Chunk) isVisible(i, j, k int32) bool {
+	hot := c.GetBlock(i, j, k)
+
+	return hot == BlockEmpty || hot == BlockWater
+}
+
+func (c *Chunk) generateMesh() {
 	tVerts := Vertices{} // Terrain vertices
 	wVerts := Vertices{} // Water vertices
 
@@ -138,22 +144,22 @@ func (c *Chunk) update() {
 
 				// The orientation order is very specific
 				// going from negative to positive based on the face's normal
-				if c.GetBlock(i, j, k-1) == BlockEmpty {
+				if c.isVisible(i, j, k-1) {
 					tVerts.BakeQuad(v1, v0, v4, v5)
 				}
-				if c.GetBlock(i, j, k+1) == BlockEmpty {
+				if c.isVisible(i, j, k+1) {
 					tVerts.BakeQuad(v3, v2, v6, v7)
 				}
-				if c.GetBlock(i-1, j, k) == BlockEmpty {
+				if c.isVisible(i-1, j, k) {
 					tVerts.BakeQuad(v0, v3, v7, v4)
 				}
-				if c.GetBlock(i+1, j, k) == BlockEmpty {
+				if c.isVisible(i+1, j, k) {
 					tVerts.BakeQuad(v2, v1, v5, v6)
 				}
-				if c.GetBlock(i, j+1, k) == BlockEmpty {
+				if c.isVisible(i, j+1, k) {
 					tVerts.BakeQuad(v7, v6, v5, v4)
 				}
-				if c.GetBlock(i, j-1, k) == BlockEmpty {
+				if c.isVisible(i, j-1, k) {
 					tVerts.BakeQuad(v0, v1, v2, v3)
 				}
 			}
