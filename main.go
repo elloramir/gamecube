@@ -1,108 +1,96 @@
+// Copyright (c) 2023 Ellora.
+// Use of this source code is governed by MIT
+// license that can be found in the LICENSE file.
+
+// This file implements the initialization/entry of the Voxel Engine.
+
 package main
 
 import (
 	"fmt"
-	"runtime"
-	_"embed"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/elloramir/gamecube/game"
 	"github.com/go-gl/gl/v3.3-core/gl"
+	"github.com/go-gl/glfw/v3.3/glfw"
+	"log"
+	"runtime"
+)
+
+const (
+	windowWidth  = 800
+	windowHeight = 600
 )
 
 func init() {
+	// This is needed to arrange that main() runs on main thread.
+	// See GLFW (go-gl) documentation for functions that are only allowed to
+	// be called from the main thread.
 	runtime.LockOSThread()
 }
 
-var (
-	screenWidth = 800
-	screenHeight = 600
-)
-
-//go:embed res/game.vert
-var vertexSource string
-//go:embed res/game.frag
-var fragmentSource string
-
 func main() {
-	err := glfw.Init()
-	if err != nil {
-		panic(err)
+	if err := glfw.Init(); err != nil {
+		log.Fatalln("failed to initialize glfw:", err)
 	}
 	defer glfw.Terminate()
 
-	// create window
 	glfw.WindowHint(glfw.Resizable, glfw.True)
 	glfw.WindowHint(glfw.ContextVersionMajor, 3)
 	glfw.WindowHint(glfw.ContextVersionMinor, 3)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-
-	window, err := glfw.CreateWindow(screenWidth, screenHeight, "", nil, nil)
+	window, err := glfw.CreateWindow(windowWidth, windowHeight, "Cube", nil, nil)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
-
-	// window callbacks
-	window.SetKeyCallback(KeyboardCallback)
-	window.SetCursorPosCallback(MouseCallback)
-
 	window.MakeContextCurrent()
-	window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled);
-	glfw.SwapInterval(1)
 
-	// load opengl
-	err = gl.Init()
-	if err != nil {
-		panic(err)
+	// Initialize Glow
+	if err := gl.Init(); err != nil {
+		log.Fatalln("failed to initialize glow:", err)
 	}
 
-	fmt.Println("welcome adventurer, to the 'gamecube'")
-	fmt.Println(gl.GoStr(gl.GetString(gl.VERSION)))
+	version := gl.GoStr(gl.GetString(gl.VERSION))
+	fmt.Println("OpenGL version", version)
 
-	// create chunk
-	for z := int32(-4); z < 4; z++ {
-		for x := int32(-4); x < 4; x++ {
-			CreateChunk(x, z)
-		}
-	}
-	defer NukeChunks()
-
-	// load default shader
-	program, err := CreateProgram(vertexSource, fragmentSource)
-	if err != nil {
-		panic(err)
-	}
-	defer gl.DeleteProgram(program)
-
+	// Configure global settings
 	gl.Enable(gl.DEPTH_TEST)
-	gl.UseProgram(program)
+	gl.Enable(gl.BLEND)
+	gl.Enable(gl.CULL_FACE)
+	gl.CullFace(gl.BACK)
+	gl.DepthFunc(gl.LESS)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	gl.ClearColor(0.1, 0.2, 0.3, 1.0)
 
-	camera := Camera{}
-	camera.Init(float32(screenWidth)/float32(screenHeight))
-
-	// load test texture
-	tex, err := LoadTexture("res/sprite.png")
+	// Playground
+	chunk := game.NewChunk(0, 0)
+	camera := game.NewCamera()
+	program, err := game.LoadShader("shaders/game.vert", "shaders/game.frag")
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
+	}
+	wprogram, err := game.LoadShader("shaders/game.vert", "shaders/water.frag")
+	if err != nil {
+		log.Fatalln(err)
 	}
 
 	for !window.ShouldClose() {
-		// update
-		camera.Update()
-		camera.SendUniforms(program)
+		// Render
+		gl.Viewport(0, 0, windowWidth, windowHeight)
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		if IsKeyDown(glfw.KeyEscape) {
-			break
+		if chunk.Terrain != nil {
+			camera.SendUniforms(program)
+			gl.UseProgram(program)
+			chunk.Terrain.Render()
+		}
+		if chunk.Water != nil {
+			camera.SendUniforms(wprogram)
+			gl.UseProgram(wprogram)
+			chunk.Water.Render()
 		}
 
-		// render
-		gl.Viewport(0, 0, int32(screenWidth), int32(screenHeight))
-		gl.ClearColor(0.1, 0.2, 0.3, 1.0)
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		gl.BindTexture(gl.TEXTURE_2D, tex)
-
-		RenderChunks()
-
+		// Maintenance
+		camera.Update()
 		window.SwapBuffers()
-		InputUpdate()
 		glfw.PollEvents()
 	}
 }
