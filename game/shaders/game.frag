@@ -1,8 +1,10 @@
 #version 330
 
 out vec4 outputColor;
-in vec3 inPos;
+in vec2 inTexCoord;
+
+uniform sampler2D sprite;
 
 void main() {
-	outputColor = vec4(mod(inPos.yxz/25.0, 1.0), 1.0);
+	outputColor = texture(sprite, inTexCoord);
 }

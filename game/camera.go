@@ -38,7 +38,7 @@ func NewCamera() *Camera {
 
 func (c *Camera) Update() {
 	c.projMat = mgl32.Perspective(mgl32.DegToRad(Fov), float32(800)/600, Near, Far)
-	c.viewMat = mgl32.LookAtV(mgl32.Vec3{30, 10, 20}, zeroVec3, upVec3)
+	c.viewMat = mgl32.LookAtV(mgl32.Vec3{30, 10, 30}, zeroVec3, upVec3)
 	c.transMat = c.projMat.Mul4(c.viewMat)
 }
 

@@ -16,10 +16,10 @@ type Mesh struct {
 	vertexCount, indexCount uint32
 }
 
-func (m *Mesh) Upload(vertices []float32, indices []uint32) {
+func (m *Mesh) Upload(data []float32, indices []uint32) {
 	m.Unload()
 
-	m.vertexCount = uint32(len(vertices) / 3)
+	m.vertexCount = uint32(len(data) / 5)
 	m.indexCount = uint32(len(indices))
 
 	// Generate OpenGL objects (again)
@@ -31,11 +31,13 @@ func (m *Mesh) Upload(vertices []float32, indices []uint32) {
 
 	// Buffer data
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.vboId)
-	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Ptr(vertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(data)*4, gl.Ptr(data), gl.STATIC_DRAW)
 
 	// Data layout
 	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 0, 0)
+	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 5*4, 0)
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointerWithOffset(1, 2, gl.FLOAT, false, 5*4, 3*4)
 
 	// Indices data
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.eboId)

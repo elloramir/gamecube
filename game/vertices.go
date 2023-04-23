@@ -20,13 +20,13 @@ type Vertices struct {
 }
 
 func (v *Vertices) BakeQuad(a, b, c, d mgl32.Vec3) {
-	i := uint32(len(v.Data) / 3)
+	i := uint32(len(v.Data) / 5)
 
 	v.Data = append(v.Data,
-		a.X(), a.Y(), a.Z(),
-		b.X(), b.Y(), b.Z(),
-		c.X(), c.Y(), c.Z(),
-		d.X(), d.Y(), d.Z())
+		a.X(), a.Y(), a.Z(), 0, 1,
+		b.X(), b.Y(), b.Z(), 1, 1,
+		c.X(), c.Y(), c.Z(), 1, 0,
+		d.X(), d.Y(), d.Z(), 0, 0)
 
 	v.Indices = append(v.Indices,
 		i+0, i+1, i+2,

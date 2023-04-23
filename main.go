@@ -72,10 +72,16 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	sprite, err := game.LoadTexture("res/test_uv.png")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	for !window.ShouldClose() {
 		// Render
 		gl.Viewport(0, 0, windowWidth, windowHeight)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		gl.BindTexture(gl.TEXTURE_2D, sprite)
 
 		if chunk.Terrain != nil {
 			camera.SendUniforms(program)
