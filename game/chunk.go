@@ -93,7 +93,7 @@ func (c *Chunk) GetBlock(x, y, z int32) uint8 {
 	return c.Data[x][y][z]
 }
 
-func (c *Chunk) isVisible(i, j, k int32) bool {
+func (c *Chunk) isTransparent(i, j, k int32) bool {
 	hot := c.GetBlock(i, j, k)
 
 	return hot == BlockEmpty || hot == BlockWater
@@ -144,22 +144,22 @@ func (c *Chunk) generateMesh() {
 
 				// The orientation order is very specific
 				// going from negative to positive based on the face's normal
-				if c.isVisible(i, j, k-1) {
+				if c.isTransparent(i, j, k-1) {
 					tVerts.BakeQuad(v1, v0, v4, v5)
 				}
-				if c.isVisible(i, j, k+1) {
+				if c.isTransparent(i, j, k+1) {
 					tVerts.BakeQuad(v3, v2, v6, v7)
 				}
-				if c.isVisible(i-1, j, k) {
+				if c.isTransparent(i-1, j, k) {
 					tVerts.BakeQuad(v0, v3, v7, v4)
 				}
-				if c.isVisible(i+1, j, k) {
+				if c.isTransparent(i+1, j, k) {
 					tVerts.BakeQuad(v2, v1, v5, v6)
 				}
-				if c.isVisible(i, j+1, k) {
+				if c.isTransparent(i, j+1, k) {
 					tVerts.BakeQuad(v7, v6, v5, v4)
 				}
-				if c.isVisible(i, j-1, k) {
+				if c.isTransparent(i, j-1, k) {
 					tVerts.BakeQuad(v0, v1, v2, v3)
 				}
 			}
