@@ -2,17 +2,18 @@
 // Use of this source code is governed by MIT
 // license that can be found in the LICENSE file.
 
-// This file implements the initialization/entry of the Voxel Engine.
-
 package main
 
 import (
 	"fmt"
-	"github.com/elloramir/gamecube/game"
-	"github.com/go-gl/gl/v3.3-core/gl"
-	"github.com/go-gl/glfw/v3.3/glfw"
 	"log"
 	"runtime"
+
+	"github.com/elloramir/gamecube/game"
+	"github.com/elloramir/gamecube/gfx"
+	"github.com/elloramir/gamecube/world"
+	"github.com/go-gl/gl/v3.3-core/gl"
+	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 const (
@@ -51,7 +52,7 @@ func main() {
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	fmt.Println("OpenGL version", version)
 
-	// Configure global settings
+	// Configure GL settings
 	gl.Enable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	gl.Enable(gl.CULL_FACE)
@@ -61,32 +62,21 @@ func main() {
 	gl.ClearColor(0.1, 0.2, 0.3, 1.0)
 
 	// Playground
-	chunk := game.NewChunk(0, 0)
+	chunk := world.NewChunk(0, 0)
 	camera := game.NewCamera()
-	program, err := game.LoadShader("shaders/game.vert", "shaders/game.frag")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	wprogram, err := game.LoadShader("shaders/game.vert", "shaders/water.frag")
-	if err != nil {
-		log.Fatalln(err)
-	}
+
+	program, _ := gfx.LoadShader("shaders/voxel.vert", "shaders/voxel.frag")
+	dem_block, _ := gfx.LoadTexture("assets/demo_block.png")
 
 	for !window.ShouldClose() {
 		// Render
 		gl.Viewport(0, 0, windowWidth, windowHeight)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		if chunk.Terrain != nil {
-			camera.SendUniforms(program)
-			gl.UseProgram(program)
-			chunk.Terrain.Render()
-		}
-		if chunk.Water != nil {
-			camera.SendUniforms(wprogram)
-			gl.UseProgram(wprogram)
-			chunk.Water.Render()
-		}
+		camera.SendUniforms(program)
+		gl.UseProgram(program)
+		gl.BindTexture(gl.TEXTURE_2D, dem_block)
+		chunk.Terrain.Render()
 
 		// Maintenance
 		camera.Update()
