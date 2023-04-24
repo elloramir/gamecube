@@ -23,7 +23,7 @@ const (
 
 type Chunk struct {
 	X, Z    int32
-	Data    [SizeWidth][SizeHeight][SizeLength]uint8
+	Data    [SizeWidth][SizeHeight][SizeLength]BlockKind
 	Terrain gfx.Mesh
 	Water   gfx.Mesh
 }
@@ -53,26 +53,26 @@ func (c *Chunk) generateTerrain() {
 
 			// Grass
 			for height >= 0 {
-				c.Data[x][height][z] = BlockGrass
+				c.Data[i][height][k] = BlockGrass
 				height -= 1
 			}
 
 			// Water
-			if c.Data[x][WaterHeight][z] == BlockEmpty {
-				c.Data[x][WaterHeight][z] = BlockWater
+			if c.Data[i][WaterHeight][k] == BlockEmpty {
+				c.Data[i][WaterHeight][k] = BlockWater
 			}
 		}
 	}
 }
 
-func (c *Chunk) GetBlock(x, y, z int32) uint8 {
+func (c *Chunk) GetBlock(x, y, z int32) BlockKind {
 	if y < 0 || y >= SizeLength {
 		return BlockVoid
 	}
 
 	// TODO: Neighbour check
 	if x < 0 || x >= SizeWidth || z < 0 || z >= SizeLength {
-		return BlockEmpty
+		return BlockVoid
 	}
 
 	return c.Data[x][y][z]
@@ -104,22 +104,22 @@ func (c *Chunk) generateMesh() {
 
 				// All other blocks
 				if c.isTransparent(i, j, k-1) {
-					generateQuad(&c.Terrain, SideSouth, i, j, k)
-				}
-				if c.isTransparent(i, j, k+1) {
 					generateQuad(&c.Terrain, SideNorth, i, j, k)
 				}
-				if c.isTransparent(i-1, j, k) {
-					generateQuad(&c.Terrain, SideWest, i, j, k)
+				if c.isTransparent(i, j, k+1) {
+					generateQuad(&c.Terrain, SideSouth, i, j, k)
 				}
 				if c.isTransparent(i+1, j, k) {
 					generateQuad(&c.Terrain, SideEast, i, j, k)
 				}
+				if c.isTransparent(i-1, j, k) {
+					generateQuad(&c.Terrain, SideWest, i, j, k)
+				}
 				if c.isTransparent(i, j+1, k) {
-					generateQuad(&c.Terrain, SideBottom, i, j, k)
+					generateQuad(&c.Terrain, SideTop, i, j, k)
 				}
 				if c.isTransparent(i, j-1, k) {
-					generateQuad(&c.Terrain, SideTop, i, j, k)
+					generateQuad(&c.Terrain, SideBottom, i, j, k)
 				}
 			}
 		}

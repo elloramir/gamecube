@@ -13,7 +13,7 @@ type Mesh struct {
 	vertexCount, indexCount uint32
 
 	vertices []float32
-	indices  []float32
+	indices  []uint32
 }
 
 func (m *Mesh) Vertex(x, y, z, n1, n2, n3, u, v float32) {
@@ -21,8 +21,10 @@ func (m *Mesh) Vertex(x, y, z, n1, n2, n3, u, v float32) {
 	m.vertexCount += 1
 }
 
+// NOTE: Quad function will use the last 4 vertices as reference to begin
 func (m *Mesh) Quad(a, b, c, d, e, f uint32) {
-	m.indices = append(m.indices, a, b, c, d, e, f)
+	var i uint32 = m.vertexCount - 4
+	m.indices = append(m.indices, i+a, i+b, i+c, i+d, i+e, i+f)
 	m.indexCount += 6
 }
 
@@ -41,7 +43,7 @@ func (m *Mesh) Upload() {
 
 	// Buffer data
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.vboId)
-	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Ptr(vertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(m.vertices)*4, gl.Ptr(m.vertices), gl.STATIC_DRAW)
 
 	// Data layout
 	gl.EnableVertexAttribArray(0)
@@ -55,10 +57,10 @@ func (m *Mesh) Upload() {
 
 	// Indices data
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.eboId)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*4, gl.Ptr(indices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(m.indices)*4, gl.Ptr(m.indices), gl.STATIC_DRAW)
 
 	gl.BindVertexArray(0) // Unbind VAO
-	m.vanish() // Voxels are pretty expensive, we don't need to keep track this data anymore
+	m.vanish()            // Voxels are pretty expensive, we don't need to keep track this data anymore
 }
 
 func (m *Mesh) Unload() {
