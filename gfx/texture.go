@@ -1,4 +1,8 @@
-package game
+// Copyright (c) 2023 Ellora.
+// Use of this source code is governed by MIT
+// license that can be found in the LICENSE file.
+
+package gfx
 
 import (
 	"fmt"
@@ -44,7 +48,7 @@ func LoadTexture(file string) (uint32, error) {
 		gl.RGBA,
 		gl.UNSIGNED_BYTE,
 		gl.Ptr(rgba.Pix))
-	gl.GenerateMipmap(gl.TEXTURE_2D);
+	gl.GenerateMipmap(gl.TEXTURE_2D)
 
 	return texture, nil
 }

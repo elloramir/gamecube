@@ -2,17 +2,14 @@
 // Use of this source code is governed by MIT
 // license that can be found in the LICENSE file.
 
-// This file has utility functions for OPENGL shaders (yes, I'm SCREAMING).
-// Also provides an embed file system for the shaders folder as it is considered
-// part of our code, not an external resource.
-
-package game
+package gfx
 
 import (
 	"embed"
 	"fmt"
-	"github.com/go-gl/gl/v3.3-core/gl"
 	"strings"
+
+	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
 //go:embed shaders/*
