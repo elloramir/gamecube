@@ -66,6 +66,7 @@ func main() {
 	camera := game.NewCamera()
 
 	program, _ := gfx.LoadShader("shaders/voxel.vert", "shaders/voxel.frag")
+	dem_block, _ := gfx.LoadTexture("assets/demo_block.png")
 
 	for !window.ShouldClose() {
 		// Render
@@ -74,6 +75,7 @@ func main() {
 
 		camera.SendUniforms(program)
 		gl.UseProgram(program)
+		gl.BindTexture(gl.TEXTURE_2D, dem_block)
 		chunk.Terrain.Render()
 
 		// Maintenance
